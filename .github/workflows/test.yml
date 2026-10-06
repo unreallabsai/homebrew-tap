@@ -1,4 +1,4 @@
-name: Test Homebrew packages
+name: Test Homebrew cask
 
 on:
   push:
@@ -25,11 +25,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - name: Check for published formulae
+      - name: Check for a published cask
         id: packages
         shell: bash
         run: |
-          if [[ -f Formula/unreal-agent.rb ]]; then
+          if [[ -f Casks/unreal-agent.rb ]]; then
             echo 'ready=true' >> "$GITHUB_OUTPUT"
           fi
       - name: Put Homebrew on PATH
@@ -43,14 +43,10 @@ jobs:
         if: steps.packages.outputs.ready == 'true'
         shell: bash
         run: |
+          brew update
           brew tap unreallabsai/tap "$GITHUB_WORKSPACE"
-          brew style unreallabsai/tap/unreal-agent unreallabsai/tap/unreal-agent-runner
           brew install unreallabsai/tap/unreal-agent
-          brew test unreallabsai/tap/unreal-agent
-          brew test unreallabsai/tap/unreal-agent-runner
           unreal-agent -version
           unreal-agent-tui -version
           uat -version
           unreal-agent-runner -h
-          test "$(brew --prefix unreallabsai/tap/uat)" = "$(brew --prefix unreallabsai/tap/unreal-agent)"
-          test "$(brew --prefix unreallabsai/tap/unreal-agent-tui)" = "$(brew --prefix unreallabsai/tap/unreal-agent)"
